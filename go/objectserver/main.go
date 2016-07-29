@@ -529,7 +529,11 @@ func GetServer(serverconf hummingbird.Config, flags *flag.FlagSet) (bindIP strin
 			server.allowedHeaders[textproto.CanonicalMIMEHeaderKey(strings.TrimSpace(headers[i]))] = true
 		}
 	}
-	server.logger = hummingbird.SetupLogger(serverconf.GetDefault("app:object-server", "log_facility", "LOG_LOCAL1"), "object-server", "")
+
+        logUDPHost := serverconf.GetDefault("DEFAULT", "log_udp_host", "127.0.0.1")
+        logUDPPort := serverconf.GetInt("DEFAULT", "log_udp_port", 514)
+        syslogRaddr := fmt.Sprintf("%s:%d", logUDPHost, logUDPPort)
+        server.logger = hummingbird.SetupLogger(serverconf.GetDefault("app:object-server", "log_facility", "LOG_LOCAL1"), "object-server", syslogRaddr)
 	server.updateTimeout = time.Duration(serverconf.GetFloat("app:object-server", "container_update_timeout", 0.25) * float64(time.Second))
 	connTimeout := time.Duration(serverconf.GetFloat("app:object-server", "conn_timeout", 1.0) * float64(time.Second))
 	nodeTimeout := time.Duration(serverconf.GetFloat("app:object-server", "node_timeout", 10.0) * float64(time.Second))

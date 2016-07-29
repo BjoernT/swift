@@ -988,7 +988,11 @@ func NewReplicator(serverconf hummingbird.Config, flags *flag.FlagSet) (hummingb
 	replicator.bindPort = int(serverconf.GetInt("object-replicator", "replicator_bind_port", int64(replicator.port+500)))
 	replicator.quorumDelete = serverconf.GetBool("object-replicator", "quorum_delete", false)
 	replicator.reclaimAge = int64(serverconf.GetInt("object-replicator", "reclaim_age", int64(hummingbird.ONE_WEEK)))
-	replicator.logger = hummingbird.SetupLogger(serverconf.GetDefault("object-replicator", "log_facility", "LOG_LOCAL0"), "object-replicator", "")
+
+        logUDPHost := serverconf.GetDefault("DEFAULT", "log_udp_host", "127.0.0.1")
+        logUDPPort := serverconf.GetInt("DEFAULT", "log_udp_port", 514)
+        syslogRaddr := fmt.Sprintf("%s:%d", logUDPHost, logUDPPort)
+        replicator.logger = hummingbird.SetupLogger(serverconf.GetDefault("object-replicator", "log_facility", "LOG_LOCAL0"), "object-replicator", syslogRaddr)
 	if serverconf.GetBool("object-replicator", "vm_test_mode", false) {
 		replicator.timePerPart = time.Duration(serverconf.GetInt("object-replicator", "ms_per_part", 2000)) * time.Millisecond
 	} else {
